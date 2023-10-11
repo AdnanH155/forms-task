@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="https://cdn.jsdelivr.net/npm/joi-browser@13.4.0/dist/joi-browser.min.js"></script>
+  </head>
+  <body>
+    <h2>Get in Contact here</h2>
+    <form action="" method="get" id="myForm"></form>
+  </body>
+</html>
+<script>
+  // error message on dom does not show
+  // not sure how to add a <p> before each input
+  const inputs = {};
+
+  const userInputs = [
+    { name: "name", type: "text" },
+    { name: "email", type: "email" },
+    { name: "number", type: "number" },
+  ];
+  let textarea = document.createElement("textarea");
+  textarea.setAttribute("cols", "50");
+  textarea.setAttribute("rows", "5");
+  textarea.setAttribute("placeholder", "enter your message here");
+  document.body.appendChild(textarea);
+
+  const ref = document.getElementById("myForm");
+
+  userInputs.forEach((input) => {
+    const inp = document.createElement("input");
+    inp.setAttribute("id", input.name);
+    inp.setAttribute("name", input.name);
+    inp.setAttribute("email", input.email);
+    inp.setAttribute("number", input.number);
+    ref.append(inp);
+
+    const el = document.createElement("p");
+    el.setAttribute("id", `${input.name} Error`);
+    el.setAttribute("class", "error");
+    ref.append(el);
+  });
+  const errorsRef = document.getElementsByClassName("error");
+
+  const joiSchema = {
+    name: Joi.string().min(3).max(15),
+    number: Joi.number().min(11).max(11).integer(),
+    message: Joi.string().min(1).max(5),
+    email: Joi.string().min(5).max(30),
+  };
+
+  function clearErrors() {
+    for (const errorRef of errorsRef) {
+      errorRef.innerHTML = "";
+    }
+  }
+
+  function getErrorsAsObject(errors) {
+    const errorsMod = {};
+
+    errors.details.forEach((error) => {
+      errorsMod[error.context.key + "Error"] = error.message;
+    });
+
+    return errorsMod;
+  }
+  // validating with joi
+  function validate() {
+    Joi.validate(inputs, joiSchema, { abortEarly: false }, (errors, data) => {
+      if (!errors) {
+        return;
+      }
+
+      const errorsMod = getErrorsAsObject(errors);
+      // enters error message in dom
+      for (const errorRef of errorsRef) {
+        if (errorsMod[errorRef.id]) {
+          errorRef.innerHTML = errorsMod[errorRef.id];
+        }
+      }
+    });
+  }
+  //clear the old errors
+  ref.addEventListener("input", (item) => {
+    clearErrors();
+
+    //store the user input in the upper scope
+    inputs[item.target.id] = item.target.value;
+
+    validate();
+  });
+</script>
